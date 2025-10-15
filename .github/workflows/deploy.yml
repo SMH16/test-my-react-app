@@ -2,21 +2,24 @@ name: Deploy React App to EC2
 
 on:
   push:
-    branches: [main] # or your branch
+    branches: [main] # deploy on main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout the repo
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build React app
+      # 2️⃣ Install dependencies & build
+      - name: Build React (Vite) app
         run: |
           npm ci
           npm run build
 
+      # 3️⃣ Copy build files to EC2
       - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -26,11 +29,19 @@ jobs:
           source: "dist/*"
           target: "/var/www/react-app"
 
-      - name: Restart Nginx
+      # 4️⃣ Prepare folder & permissions + Restart Nginx
+      - name: Setup folder permissions and restart Nginx
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Make sure target folder exists
+            sudo mkdir -p /var/www/react-app
+            sudo chown -R $USER:$USER /var/www/react-app
+            sudo chmod -R 755 /var/www/react-app
+
+            # Restart Nginx
+            sudo nginx -t
             sudo systemctl restart nginx
