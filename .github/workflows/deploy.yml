@@ -28,7 +28,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "dist/*"
           target: "/var/www/react-app"
-          debug: true
 
       # 4️⃣ Prepare folder & permissions + Restart Nginx
       - name: Setup folder permissions and restart Nginx
