@@ -25,6 +25,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "dist/*"
           target: "/var/www/react-app"
+          debug: true
 
       - name: Restart Nginx
         uses: appleboy/ssh-action@v0.1.10
